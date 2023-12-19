@@ -51,7 +51,7 @@ class Decision:
     def __str__(self):
         return f"{self.action} {self.res} ohm"
     
-    def inverse_propogate(self, res):
+    def inverse_propagate(self, res):
         if self.action == "serial":
             return res - self.res
         else:
@@ -60,7 +60,7 @@ class Decision:
             except ZeroDivisionError:
                 return -1e9
     
-    def forward_propogate(self, res):
+    def forward_propagate(self, res):
         if self.action == "serial":
             return res + self.res
         else:
@@ -106,7 +106,7 @@ def get_shortest_decision_chain(res: float):
         for res in res_layers[-1]:
             random.shuffle(decision_list)
             for decision in decision_list:
-                new_res = decision.inverse_propogate(res)
+                new_res = decision.inverse_propagate(res)
                 if new_res >= error:
                     append_no_duplicate(new_res_layer, new_decision_layer, new_res, decision)
                 elif math.fabs(new_res) < error:
@@ -128,13 +128,13 @@ def get_shortest_decision_chain(res: float):
     for i in range(len(res_layers) - 1, 0, -1):
         res_idx = index_float(res_layers[i], current_res)
         decision_chain.append(decision_layers[i - 1][res_idx])
-        current_res = decision_chain[-1].forward_propogate(current_res)
+        current_res = decision_chain[-1].forward_propagate(current_res)
     
     # Re-calcuate the designed resistance from 0 ohm if it is not optimum.
     if not is_solution_found:
         current_res = 0
         for decision in decision_chain:
-            current_res = decision.forward_propogate(current_res)
+            current_res = decision.forward_propagate(current_res)
     
     return decision_chain, current_res, is_solution_found
 
